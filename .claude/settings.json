@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//Users/alc/Library/Caches/**)",
+      "Bash(npm ls *)",
+      "Read(//Users/alc/.cache/**)",
+      "Read(//Applications/Google Chrome.app/**)"
+    ]
+  }
+}
