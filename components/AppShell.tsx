@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { SCHEMA } from "@/lib/schema";
 import { ASSET_TYPES, type AssetType } from "@/lib/types";
 import { DATA_CHANGED_EVENT, getStore } from "@/lib/data";
+import { lock } from "@/lib/gate";
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -43,6 +44,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             <span className="dot" style={{ background: "var(--warn)" }}></span>
             <span>ข้อมูลบันทึกในเบราว์เซอร์เครื่องนี้</span>
           </div>
+          <button className="btn ghost" onClick={lock} title="ออกจากระบบ">
+            <i className="ti ti-logout"></i> ออกจากระบบ
+          </button>
         </div>
         <nav className="tabs">
           <button className={active("/")} onClick={() => router.push("/")}>
