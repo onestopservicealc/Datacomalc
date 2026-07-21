@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { MONO_KEYS, SCHEMA } from "@/lib/schema";
 import type { AssetRecord, AssetType } from "@/lib/types";
 import { distinctValues, getStore, notifyDataChanged } from "@/lib/data";
@@ -9,9 +9,16 @@ import { GroupCell, OsBadge, PlainCell } from "./badges";
 import RecordModal from "./RecordModal";
 import { Toast, useToast } from "./Toast";
 
-export default function AssetTable({ type }: { type: AssetType }) {
+export default function AssetTable({
+  type,
+  initial,
+}: {
+  type: AssetType;
+  initial: AssetRecord[];
+}) {
   const sc = SCHEMA[type];
-  const [records, setRecords] = useState<AssetRecord[] | null>(null);
+  // seed จากข้อมูลที่ server ส่งมา — ไม่ fetch ตอน mount (ไม่มี spinner)
+  const [records, setRecords] = useState<AssetRecord[]>(initial);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("");
   // modal: undefined = ปิด, null = เพิ่มใหม่, record = แก้ไข
@@ -20,42 +27,34 @@ export default function AssetTable({ type }: { type: AssetType }) {
   );
   const { toast, show } = useToast();
 
+  // reload เรียกเฉพาะหลัง insert/update/delete (ไม่ใช่ตอน mount)
   const reload = useCallback(async () => {
     try {
       setRecords(await getStore().list(type));
     } catch (err) {
       console.error("โหลดข้อมูลไม่สำเร็จ:", err);
-      setRecords([]); // ไม่ค้างหน้าโหลด — โชว์ตารางว่างแทน
       show("โหลดข้อมูลไม่สำเร็จ ลองรีเฟรชหน้า", true);
     }
   }, [type, show]);
 
-  useEffect(() => {
-    // โหลดข้อมูลตอน mount — DataStore เป็น async (เตรียมไว้สำหรับ Supabase) setState จึงไม่ synchronous จริง
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    reload();
-  }, [reload]);
+  const groupOptions = useMemo(
+    () => distinctValues(records, sc.groupField),
+    [records, sc.groupField],
+  );
 
-  if (!records) {
-    return (
-      <div className="panel">
-        <div className="loading">
-          <div className="spin"></div>กำลังโหลดข้อมูล…
-        </div>
-      </div>
-    );
-  }
-
-  const groupOptions = distinctValues(records, sc.groupField);
-
-  let rows = records;
-  if (filter) rows = rows.filter((r) => (r[sc.groupField] || "") === filter);
-  if (search) {
-    const q = search.toLowerCase();
-    rows = rows.filter((r) =>
-      Object.values(r).some((v) => String(v || "").toLowerCase().includes(q)),
-    );
-  }
+  const rows = useMemo(() => {
+    let r = records;
+    if (filter) r = r.filter((x) => (x[sc.groupField] || "") === filter);
+    if (search) {
+      const q = search.toLowerCase();
+      r = r.filter((x) =>
+        Object.values(x).some((v) =>
+          String(v || "").toLowerCase().includes(q),
+        ),
+      );
+    }
+    return r;
+  }, [records, filter, search, sc.groupField]);
 
   async function saveRecord(data: Record<string, string>) {
     const store = getStore();

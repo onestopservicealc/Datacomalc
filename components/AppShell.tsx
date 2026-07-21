@@ -1,47 +1,44 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { SCHEMA } from "@/lib/schema";
 import { ASSET_TYPES, type AssetType } from "@/lib/types";
 import { DATA_CHANGED_EVENT } from "@/lib/data";
 import { getCounts } from "@/lib/actions";
 import { signOutAction } from "@/lib/auth/actions";
-import { authClient } from "@/lib/auth/client";
-import { isAdmin } from "@/lib/auth/admin-emails";
 
-export default function AppShell({ children }: { children: React.ReactNode }) {
-  const router = useRouter();
+export default function AppShell({
+  children,
+  email,
+  admin,
+  initialCounts,
+}: {
+  children: React.ReactNode;
+  email: string;
+  admin: boolean;
+  initialCounts: Record<AssetType, number>;
+}) {
   const pathname = usePathname();
-  const [counts, setCounts] = useState<Record<AssetType, number> | null>(null);
+  // seed counts จาก server — ไม่ fetch ตอน mount
+  const [counts, setCounts] = useState<Record<AssetType, number>>(initialCounts);
 
-  const loadCounts = useCallback(async () => {
+  // reload counts เฉพาะหลัง mutation (event) — ไม่ยิงตอน mount
+  const reloadCounts = useCallback(async () => {
     try {
-      setCounts(await getCounts()); // query เดียว (count) แทนดึงเต็มแถว 4 ครั้ง
+      setCounts(await getCounts());
     } catch (err) {
       console.error("โหลดจำนวนครุภัณฑ์ไม่สำเร็จ:", err);
-      // ตั้งเป็น 0 ทุกแท็บ — ไม่ค้างที่ "…"
-      setCounts(
-        Object.fromEntries(ASSET_TYPES.map((t) => [t, 0])) as Record<
-          AssetType,
-          number
-        >,
-      );
     }
   }, []);
 
   useEffect(() => {
-    // โหลดข้อมูลตอน mount — DataStore เป็น async (เตรียมไว้สำหรับ Supabase) setState จึงไม่ synchronous จริง
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    loadCounts();
-    window.addEventListener(DATA_CHANGED_EVENT, loadCounts);
-    return () => window.removeEventListener(DATA_CHANGED_EVENT, loadCounts);
-  }, [loadCounts]);
+    window.addEventListener(DATA_CHANGED_EVENT, reloadCounts);
+    return () => window.removeEventListener(DATA_CHANGED_EVENT, reloadCounts);
+  }, [reloadCounts]);
 
   const active = (path: string) => (pathname === path ? "active" : "");
-
-  const { data: session } = authClient.useSession();
-  const userEmail = session?.user?.email;
 
   return (
     <>
@@ -55,7 +52,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           <div className="top-spacer"></div>
           <div className="sync">
             <span className="dot" style={{ background: "var(--ok)" }}></span>
-            <span>{userEmail ?? "เชื่อมต่อฐานข้อมูล Neon"}</span>
+            <span>{email}</span>
           </div>
           <button
             className="btn ghost"
@@ -66,26 +63,19 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           </button>
         </div>
         <nav className="tabs">
-          <button className={active("/")} onClick={() => router.push("/")}>
+          <Link href="/" className={active("/")}>
             <i className="ti ti-layout-dashboard"></i> ภาพรวม
-          </button>
+          </Link>
           {ASSET_TYPES.map((t) => (
-            <button
-              key={t}
-              className={active(`/${t}`)}
-              onClick={() => router.push(`/${t}`)}
-            >
+            <Link key={t} href={`/${t}`} className={active(`/${t}`)}>
               <i className={`ti ${SCHEMA[t].icon}`}></i> {SCHEMA[t].label}{" "}
-              <span className="cnt">{counts ? counts[t] : "…"}</span>
-            </button>
+              <span className="cnt">{counts[t]}</span>
+            </Link>
           ))}
-          {isAdmin(userEmail) && (
-            <button
-              className={active("/admin")}
-              onClick={() => router.push("/admin")}
-            >
+          {admin && (
+            <Link href="/admin" className={active("/admin")}>
               <i className="ti ti-user-shield"></i> ผู้ดูแลระบบ
-            </button>
+            </Link>
           )}
         </nav>
       </header>

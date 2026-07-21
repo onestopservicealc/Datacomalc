@@ -1,39 +1,12 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import { GROUPS, NETWORK_INFO, SCHEMA } from "@/lib/schema";
-import { ASSET_TYPES, type AssetRecord, type AssetType } from "@/lib/types";
+import { ASSET_TYPES, type AssetType } from "@/lib/types";
 import { listAll } from "@/lib/actions";
 
-type AllData = Record<AssetType, AssetRecord[]>;
+export const dynamic = "force-dynamic";
 
-export default function DashboardPage() {
-  const [data, setData] = useState<AllData | null>(null);
-
-  useEffect(() => {
-    (async () => {
-      try {
-        setData(await listAll()); // query เดียวดึงทุก type
-      } catch (err) {
-        console.error("โหลดข้อมูลภาพรวมไม่สำเร็จ:", err);
-        setData(
-          Object.fromEntries(
-            ASSET_TYPES.map((t) => [t, [] as AssetRecord[]]),
-          ) as AllData,
-        );
-      }
-    })();
-  }, []);
-
-  if (!data) {
-    return (
-      <div className="panel">
-        <div className="loading">
-          <div className="spin"></div>กำลังโหลดข้อมูล…
-        </div>
-      </div>
-    );
-  }
+/** ภาพรวม — Server Component: ดึง + คำนวณสถิติฝั่ง server (ไม่มี client fetch/spinner) */
+export default async function DashboardPage() {
+  const data = await listAll();
 
   const total = ASSET_TYPES.reduce((a, t) => a + data[t].length, 0);
   const win10 = (t: AssetType) =>

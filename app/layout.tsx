@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { IBM_Plex_Sans_Thai, IBM_Plex_Mono } from "next/font/google";
+import "@tabler/icons-webfont/dist/tabler-icons.min.css";
 import "./globals.css";
 
 const sans = IBM_Plex_Sans_Thai({
@@ -26,12 +27,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="th" className={`${sans.variable} ${mono.variable}`}>
-      <head>
-        <link
-          href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.4.0/dist/tabler-icons.min.css"
-          rel="stylesheet"
-        />
-      </head>
       <body>{children}</body>
     </html>
   );

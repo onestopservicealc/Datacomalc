@@ -1,16 +1,18 @@
-"use client";
-
 import { notFound } from "next/navigation";
-import { use } from "react";
 import AssetTable from "@/components/AssetTable";
 import { isAssetType } from "@/lib/types";
+import { listAssets } from "@/lib/actions";
 
-export default function AssetTypePage({
+export const dynamic = "force-dynamic";
+
+/** โหลดข้อมูลฝั่ง server แล้ว seed ให้ AssetTable — ไม่มี fetch ตอน mount, ไม่มี spinner */
+export default async function AssetTypePage({
   params,
 }: {
   params: Promise<{ type: string }>;
 }) {
-  const { type } = use(params);
+  const { type } = await params;
   if (!isAssetType(type)) notFound();
-  return <AssetTable key={type} type={type} />;
+  const initial = await listAssets(type);
+  return <AssetTable key={type} type={type} initial={initial} />;
 }
