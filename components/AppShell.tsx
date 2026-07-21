@@ -5,7 +5,8 @@ import { usePathname, useRouter } from "next/navigation";
 import { SCHEMA } from "@/lib/schema";
 import { ASSET_TYPES, type AssetType } from "@/lib/types";
 import { DATA_CHANGED_EVENT, getStore } from "@/lib/data";
-import { lock } from "@/lib/gate";
+import { authClient } from "@/lib/auth/client";
+import { isAdmin } from "@/lib/auth/admin-emails";
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -30,6 +31,14 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
   const active = (path: string) => (pathname === path ? "active" : "");
 
+  const { data: session } = authClient.useSession();
+  const userEmail = session?.user?.email;
+
+  async function signOut() {
+    await authClient.signOut();
+    window.location.href = "/auth/sign-in";
+  }
+
   return (
     <>
       <header className="top">
@@ -42,9 +51,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           <div className="top-spacer"></div>
           <div className="sync">
             <span className="dot" style={{ background: "var(--ok)" }}></span>
-            <span>เชื่อมต่อฐานข้อมูล Neon</span>
+            <span>{userEmail ?? "เชื่อมต่อฐานข้อมูล Neon"}</span>
           </div>
-          <button className="btn ghost" onClick={lock} title="ออกจากระบบ">
+          <button className="btn ghost" onClick={signOut} title="ออกจากระบบ">
             <i className="ti ti-logout"></i> ออกจากระบบ
           </button>
         </div>
@@ -62,6 +71,14 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               <span className="cnt">{counts ? counts[t] : "…"}</span>
             </button>
           ))}
+          {isAdmin(userEmail) && (
+            <button
+              className={active("/admin")}
+              onClick={() => router.push("/admin")}
+            >
+              <i className="ti ti-user-shield"></i> ผู้ดูแลระบบ
+            </button>
+          )}
         </nav>
       </header>
       <div className="wrap">{children}</div>
