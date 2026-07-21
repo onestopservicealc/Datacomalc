@@ -55,6 +55,9 @@
   .tablewrap{overflow-x:auto}
   table{width:100%;border-collapse:collapse;font-size:var(--fs-table)}
   thead th{text-align:left;font-weight:600;color:var(--ink-2);font-size:var(--fs-xs);letter-spacing:.02em;padding:14px 16px;background:#FafbFC;border-bottom:1px solid var(--line);white-space:nowrap;position:sticky;top:0}
+  thead th.sortable{cursor:pointer;user-select:none}
+  thead th.sortable:hover{color:var(--ink)}
+  .sort-ind{display:inline-block;width:1em;margin-left:2px;font-size:.85em;color:var(--accent)}
   tbody td{padding:14px 16px;border-bottom:1px solid var(--line);vertical-align:middle}
   tbody tr:last-child td{border-bottom:0}
   tbody tr{cursor:pointer}

@@ -24,6 +24,12 @@ export default function AssetTable({
   // ให้ช่องค้นหาตอบสนองทันที แต่หน่วงการกรองตาราง (ไม่กระตุกเมื่อข้อมูลเยอะ)
   const deferredSearch = useDeferredValue(search);
   const [filter, setFilter] = useState("");
+  // จัดเรียงตามคอลัมน์: dir 1 = น้อย→มาก, -1 = มาก→น้อย
+  const [sort, setSort] = useState<{ key: string; dir: 1 | -1 } | null>(null);
+  const toggleSort = (key: string) =>
+    setSort((s) =>
+      s?.key === key ? { key, dir: (s.dir === 1 ? -1 : 1) as 1 | -1 } : { key, dir: 1 },
+    );
   // modal: undefined = ปิด, null = เพิ่มใหม่, record = แก้ไข
   const [editing, setEditing] = useState<AssetRecord | null | undefined>(
     undefined,
@@ -56,8 +62,20 @@ export default function AssetTable({
         ),
       );
     }
+    if (sort) {
+      // copy ก่อน sort (กันแก้ state), numeric = เรียงเลข/IP/เลขครุภัณฑ์ถูกต้อง
+      r = [...r].sort(
+        (a, b) =>
+          sort.dir *
+          String(a[sort.key] || "").localeCompare(
+            String(b[sort.key] || ""),
+            "th",
+            { numeric: true },
+          ),
+      );
+    }
     return r;
-  }, [records, filter, deferredSearch, sc.groupField]);
+  }, [records, filter, deferredSearch, sc.groupField, sort]);
 
   async function saveRecord(data: Record<string, string>) {
     const store = getStore();
@@ -122,8 +140,23 @@ export default function AssetTable({
             <thead>
               <tr>
                 {sc.tableCols.map(([key, label]) => (
-                  <th key={key} className={MONO_KEYS.has(key) ? "mono" : ""}>
+                  <th
+                    key={key}
+                    className={`sortable${MONO_KEYS.has(key) ? " mono" : ""}`}
+                    onClick={() => toggleSort(key)}
+                    aria-sort={
+                      sort?.key === key
+                        ? sort.dir === 1
+                          ? "ascending"
+                          : "descending"
+                        : "none"
+                    }
+                    title="คลิกเพื่อจัดเรียง"
+                  >
                     {label}
+                    <span className="sort-ind">
+                      {sort?.key === key ? (sort.dir === 1 ? "▲" : "▼") : ""}
+                    </span>
                   </th>
                 ))}
                 <th></th>
