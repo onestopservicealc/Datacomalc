@@ -172,6 +172,7 @@ export const SCHEMA: Record<AssetType, TypeSchema> = {
       ["group", "กลุ่มงาน"],
       ["asset", "เลขครุภัณฑ์"],
       ["brand", "ยี่ห้อ"],
+      ["model", "รุ่น"],
       ["capacity", "ความจุ"],
     ],
     groupField: "group",
