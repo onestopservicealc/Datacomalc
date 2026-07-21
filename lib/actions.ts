@@ -1,7 +1,7 @@
 "use server";
 
 import { sql } from "./db";
-import { isAssetType } from "./types";
+import { ASSET_TYPES, isAssetType } from "./types";
 import type { AssetRecord, AssetType } from "./types";
 
 /**
@@ -28,6 +28,36 @@ export async function listAssets(type: string): Promise<AssetRecord[]> {
     order by created_at asc
   `) as { id: string; data: Record<string, string> }[];
   return rows.map(toRecord);
+}
+
+/** จำนวนครุภัณฑ์ต่อ type — query เดียว (count) แทนดึงเต็มแถว 4 ครั้ง */
+export async function getCounts(): Promise<Record<AssetType, number>> {
+  const rows = (await sql`
+    select type, count(*)::int as n from assets group by type
+  `) as { type: string; n: number }[];
+  const counts = Object.fromEntries(
+    ASSET_TYPES.map((t) => [t, 0]),
+  ) as Record<AssetType, number>;
+  for (const r of rows) {
+    if (isAssetType(r.type)) counts[r.type] = r.n;
+  }
+  return counts;
+}
+
+/** ดึงครุภัณฑ์ทุก type ใน query เดียว (สำหรับหน้า dashboard) */
+export async function listAll(): Promise<Record<AssetType, AssetRecord[]>> {
+  const rows = (await sql`
+    select id::text as id, type, data
+    from assets
+    order by created_at asc
+  `) as { id: string; type: string; data: Record<string, string> }[];
+  const out = Object.fromEntries(
+    ASSET_TYPES.map((t) => [t, [] as AssetRecord[]]),
+  ) as Record<AssetType, AssetRecord[]>;
+  for (const r of rows) {
+    if (isAssetType(r.type)) out[r.type].push(toRecord(r));
+  }
+  return out;
 }
 
 export async function insertAsset(

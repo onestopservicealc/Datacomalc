@@ -4,7 +4,9 @@ import { useCallback, useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { SCHEMA } from "@/lib/schema";
 import { ASSET_TYPES, type AssetType } from "@/lib/types";
-import { DATA_CHANGED_EVENT, getStore } from "@/lib/data";
+import { DATA_CHANGED_EVENT } from "@/lib/data";
+import { getCounts } from "@/lib/actions";
+import { signOutAction } from "@/lib/auth/actions";
 import { authClient } from "@/lib/auth/client";
 import { isAdmin } from "@/lib/auth/admin-emails";
 
@@ -15,13 +17,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
   const loadCounts = useCallback(async () => {
     try {
-      const store = getStore();
-      const entries = await Promise.all(
-        ASSET_TYPES.map(
-          async (t) => [t, (await store.list(t)).length] as const,
-        ),
-      );
-      setCounts(Object.fromEntries(entries) as Record<AssetType, number>);
+      setCounts(await getCounts()); // query เดียว (count) แทนดึงเต็มแถว 4 ครั้ง
     } catch (err) {
       console.error("โหลดจำนวนครุภัณฑ์ไม่สำเร็จ:", err);
       // ตั้งเป็น 0 ทุกแท็บ — ไม่ค้างที่ "…"
@@ -47,11 +43,6 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const { data: session } = authClient.useSession();
   const userEmail = session?.user?.email;
 
-  async function signOut() {
-    await authClient.signOut();
-    window.location.href = "/auth/sign-in";
-  }
-
   return (
     <>
       <header className="top">
@@ -66,7 +57,11 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             <span className="dot" style={{ background: "var(--ok)" }}></span>
             <span>{userEmail ?? "เชื่อมต่อฐานข้อมูล Neon"}</span>
           </div>
-          <button className="btn ghost" onClick={signOut} title="ออกจากระบบ">
+          <button
+            className="btn ghost"
+            onClick={() => signOutAction()}
+            title="ออกจากระบบ"
+          >
             <i className="ti ti-logout"></i> ออกจากระบบ
           </button>
         </div>

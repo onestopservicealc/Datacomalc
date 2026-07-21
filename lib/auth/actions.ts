@@ -1,8 +1,18 @@
 "use server";
 
+import { redirect } from "next/navigation";
 import { sql } from "@/lib/db";
 import { auth } from "@/lib/auth/server";
 import { isAdmin, isAllowed, listAllowed } from "@/lib/auth/allowlist";
+
+/**
+ * ออกจากระบบ — ต้องทำฝั่ง server เพื่อเคลียร์ signed session-data cache cookie
+ * (client signOut เคลียร์ไม่หมด → guard ยังเห็น session จาก cache กด logout ไม่ออก)
+ */
+export async function signOutAction(): Promise<void> {
+  await auth.signOut();
+  redirect("/auth/sign-in");
+}
 
 /**
  * Server actions สำหรับ whitelist

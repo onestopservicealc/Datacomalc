@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { GROUPS, NETWORK_INFO, SCHEMA } from "@/lib/schema";
 import { ASSET_TYPES, type AssetRecord, type AssetType } from "@/lib/types";
-import { getStore } from "@/lib/data";
+import { listAll } from "@/lib/actions";
 
 type AllData = Record<AssetType, AssetRecord[]>;
 
@@ -12,11 +12,16 @@ export default function DashboardPage() {
 
   useEffect(() => {
     (async () => {
-      const store = getStore();
-      const entries = await Promise.all(
-        ASSET_TYPES.map(async (t) => [t, await store.list(t)] as const),
-      );
-      setData(Object.fromEntries(entries) as AllData);
+      try {
+        setData(await listAll()); // query เดียวดึงทุก type
+      } catch (err) {
+        console.error("โหลดข้อมูลภาพรวมไม่สำเร็จ:", err);
+        setData(
+          Object.fromEntries(
+            ASSET_TYPES.map((t) => [t, [] as AssetRecord[]]),
+          ) as AllData,
+        );
+      }
     })();
   }, []);
 

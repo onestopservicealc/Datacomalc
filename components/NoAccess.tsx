@@ -1,14 +1,9 @@
 "use client";
 
-import { authClient } from "@/lib/auth/client";
+import { signOutAction } from "@/lib/auth/actions";
 
 /** หน้าแสดงเมื่อ login สำเร็จแต่อีเมลไม่อยู่ใน whitelist */
 export default function NoAccess({ email }: { email: string }) {
-  async function signOut() {
-    await authClient.signOut();
-    window.location.href = "/auth/sign-in";
-  }
-
   return (
     <div className="gate">
       <div className="gate-card">
@@ -20,7 +15,7 @@ export default function NoAccess({ email }: { email: string }) {
           บัญชี <b>{email}</b> ยังไม่ได้รับอนุญาตให้เข้าใช้งานระบบนี้
           กรุณาติดต่อผู้ดูแลระบบ
         </p>
-        <button className="btn primary gate-btn" onClick={signOut}>
+        <button className="btn primary gate-btn" onClick={() => signOutAction()}>
           <i className="ti ti-logout"></i> ออกจากระบบ
         </button>
       </div>
