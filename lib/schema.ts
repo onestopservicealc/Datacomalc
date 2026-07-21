@@ -47,6 +47,8 @@ export const SCHEMA: Record<AssetType, TypeSchema> = {
       ["name", "ชื่อ-นามสกุล"],
       ["group", "กลุ่มงาน"],
       ["asset", "เลขครุภัณฑ์"],
+      ["brand", "ยี่ห้อ"],
+      ["model", "รุ่น"],
       ["computerName", "Computer Name"],
       ["ip", "IP Address"],
       ["os", "Windows"],
