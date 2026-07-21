@@ -141,9 +141,9 @@ export default function DashboardPage() {
             key={line}
             style={{
               fontFamily: "var(--mono)",
-              fontSize: 12,
+              fontSize: "var(--fs-xs)",
               color: "var(--ink-2)",
-              padding: "3px 0",
+              padding: "4px 0",
             }}
           >
             {line}

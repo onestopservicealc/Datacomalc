@@ -152,26 +152,30 @@ export default function AssetTable({ type }: { type: AssetType }) {
                     ))}
                     <td>
                       <div className="rowact">
-                        <div
+                        <button
+                          type="button"
                           className="iconbtn"
                           title="แก้ไข"
+                          aria-label="แก้ไขรายการ"
                           onClick={(e) => {
                             e.stopPropagation();
                             setEditing(r);
                           }}
                         >
-                          <i className="ti ti-edit"></i>
-                        </div>
-                        <div
+                          <i className="ti ti-edit" aria-hidden="true"></i>
+                        </button>
+                        <button
+                          type="button"
                           className="iconbtn del"
                           title="ลบ"
+                          aria-label="ลบรายการ"
                           onClick={(e) => {
                             e.stopPropagation();
                             deleteRecord(r._id);
                           }}
                         >
-                          <i className="ti ti-trash"></i>
-                        </div>
+                          <i className="ti ti-trash" aria-hidden="true"></i>
+                        </button>
                       </div>
                     </td>
                   </tr>
