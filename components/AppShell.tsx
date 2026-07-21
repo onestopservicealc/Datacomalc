@@ -41,8 +41,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           </div>
           <div className="top-spacer"></div>
           <div className="sync">
-            <span className="dot" style={{ background: "var(--warn)" }}></span>
-            <span>ข้อมูลบันทึกในเบราว์เซอร์เครื่องนี้</span>
+            <span className="dot" style={{ background: "var(--ok)" }}></span>
+            <span>เชื่อมต่อฐานข้อมูล Neon</span>
           </div>
           <button className="btn ghost" onClick={lock} title="ออกจากระบบ">
             <i className="ti ti-logout"></i> ออกจากระบบ
