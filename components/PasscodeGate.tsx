@@ -2,7 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { GATE_KEY, PASSCODE } from "@/lib/gate";
+<<<<<<< HEAD
 import Icon from "./Icon";
+=======
+>>>>>>> efe2fa82cc3d98979f447563e8b9b2f3a557cabb
 
 export default function PasscodeGate({
   children,
@@ -15,8 +18,11 @@ export default function PasscodeGate({
   const [error, setError] = useState(false);
 
   useEffect(() => {
+<<<<<<< HEAD
     // อ่าน sessionStorage ตอน mount (client เท่านั้น) กันหน้ากะพริบตอน hydrate
     // eslint-disable-next-line react-hooks/set-state-in-effect
+=======
+>>>>>>> efe2fa82cc3d98979f447563e8b9b2f3a557cabb
     setUnlocked(sessionStorage.getItem(GATE_KEY) === "1");
   }, []);
 
@@ -53,7 +59,11 @@ export default function PasscodeGate({
         />
         {error && <div className="gate-err">รหัสผ่านไม่ถูกต้อง</div>}
         <button type="submit" className="btn primary gate-btn">
+<<<<<<< HEAD
           <Icon name="lock-open" /> เข้าสู่ระบบ
+=======
+          <i className="ti ti-lock-open"></i> เข้าสู่ระบบ
+>>>>>>> efe2fa82cc3d98979f447563e8b9b2f3a557cabb
         </button>
       </form>
     </div>

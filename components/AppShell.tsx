@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { SCHEMA } from "@/lib/schema";
 import { ASSET_TYPES, type AssetType } from "@/lib/types";
 import { DATA_CHANGED_EVENT } from "@/lib/data";
+<<<<<<< HEAD
 import { refetchCounts } from "@/lib/actions";
 import { lock } from "@/lib/gate";
 import Icon from "./Icon";
@@ -25,12 +26,35 @@ export default function AppShell({
   const loadCounts = useCallback(async () => {
     try {
       setCounts(await refetchCounts());
+=======
+import { getCounts } from "@/lib/actions";
+import { lock } from "@/lib/gate";
+
+export default function AppShell({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const [counts, setCounts] = useState<Record<AssetType, number> | null>(null);
+
+  const loadCounts = useCallback(async () => {
+    try {
+      setCounts(await getCounts()); // query เดียว (count) ทุก type
+>>>>>>> efe2fa82cc3d98979f447563e8b9b2f3a557cabb
     } catch (err) {
       console.error("โหลดจำนวนครุภัณฑ์ไม่สำเร็จ:", err);
+      setCounts(
+        Object.fromEntries(ASSET_TYPES.map((t) => [t, 0])) as Record<
+          AssetType,
+          number
+        >,
+      );
     }
   }, []);
 
   useEffect(() => {
+<<<<<<< HEAD
+=======
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    loadCounts();
+>>>>>>> efe2fa82cc3d98979f447563e8b9b2f3a557cabb
     window.addEventListener(DATA_CHANGED_EVENT, loadCounts);
     return () => window.removeEventListener(DATA_CHANGED_EVENT, loadCounts);
   }, [loadCounts]);
@@ -52,7 +76,11 @@ export default function AppShell({
             <span>เชื่อมต่อฐานข้อมูล Neon</span>
           </div>
           <button className="btn ghost" onClick={lock} title="ออกจากระบบ">
+<<<<<<< HEAD
             <Icon name="logout" /> ออกจากระบบ
+=======
+            <i className="ti ti-logout"></i> ออกจากระบบ
+>>>>>>> efe2fa82cc3d98979f447563e8b9b2f3a557cabb
           </button>
         </div>
         <nav className="tabs">
@@ -61,8 +89,13 @@ export default function AppShell({
           </Link>
           {ASSET_TYPES.map((t) => (
             <Link key={t} href={`/${t}`} className={active(`/${t}`)}>
+<<<<<<< HEAD
               <Icon name={SCHEMA[t].icon} /> {SCHEMA[t].label}{" "}
               <span className="cnt">{counts[t]}</span>
+=======
+              <i className={`ti ${SCHEMA[t].icon}`}></i> {SCHEMA[t].label}{" "}
+              <span className="cnt">{counts ? counts[t] : "…"}</span>
+>>>>>>> efe2fa82cc3d98979f447563e8b9b2f3a557cabb
             </Link>
           ))}
         </nav>
