@@ -14,11 +14,24 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const [counts, setCounts] = useState<Record<AssetType, number> | null>(null);
 
   const loadCounts = useCallback(async () => {
-    const store = getStore();
-    const entries = await Promise.all(
-      ASSET_TYPES.map(async (t) => [t, (await store.list(t)).length] as const),
-    );
-    setCounts(Object.fromEntries(entries) as Record<AssetType, number>);
+    try {
+      const store = getStore();
+      const entries = await Promise.all(
+        ASSET_TYPES.map(
+          async (t) => [t, (await store.list(t)).length] as const,
+        ),
+      );
+      setCounts(Object.fromEntries(entries) as Record<AssetType, number>);
+    } catch (err) {
+      console.error("โหลดจำนวนครุภัณฑ์ไม่สำเร็จ:", err);
+      // ตั้งเป็น 0 ทุกแท็บ — ไม่ค้างที่ "…"
+      setCounts(
+        Object.fromEntries(ASSET_TYPES.map((t) => [t, 0])) as Record<
+          AssetType,
+          number
+        >,
+      );
+    }
   }, []);
 
   useEffect(() => {

@@ -21,8 +21,14 @@ export default function AssetTable({ type }: { type: AssetType }) {
   const { toast, show } = useToast();
 
   const reload = useCallback(async () => {
-    setRecords(await getStore().list(type));
-  }, [type]);
+    try {
+      setRecords(await getStore().list(type));
+    } catch (err) {
+      console.error("โหลดข้อมูลไม่สำเร็จ:", err);
+      setRecords([]); // ไม่ค้างหน้าโหลด — โชว์ตารางว่างแทน
+      show("โหลดข้อมูลไม่สำเร็จ ลองรีเฟรชหน้า", true);
+    }
+  }, [type, show]);
 
   useEffect(() => {
     // โหลดข้อมูลตอน mount — DataStore เป็น async (เตรียมไว้สำหรับ Supabase) setState จึงไม่ synchronous จริง
