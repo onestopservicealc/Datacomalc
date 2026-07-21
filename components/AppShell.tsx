@@ -7,36 +7,32 @@ import { SCHEMA } from "@/lib/schema";
 import { ASSET_TYPES, type AssetType } from "@/lib/types";
 import { DATA_CHANGED_EVENT } from "@/lib/data";
 import { getCounts } from "@/lib/actions";
-import { signOutAction } from "@/lib/auth/actions";
+import { lock } from "@/lib/gate";
 
-export default function AppShell({
-  children,
-  email,
-  admin,
-  initialCounts,
-}: {
-  children: React.ReactNode;
-  email: string;
-  admin: boolean;
-  initialCounts: Record<AssetType, number>;
-}) {
+export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  // seed counts จาก server — ไม่ fetch ตอน mount
-  const [counts, setCounts] = useState<Record<AssetType, number>>(initialCounts);
+  const [counts, setCounts] = useState<Record<AssetType, number> | null>(null);
 
-  // reload counts เฉพาะหลัง mutation (event) — ไม่ยิงตอน mount
-  const reloadCounts = useCallback(async () => {
+  const loadCounts = useCallback(async () => {
     try {
-      setCounts(await getCounts());
+      setCounts(await getCounts()); // query เดียว (count) ทุก type
     } catch (err) {
       console.error("โหลดจำนวนครุภัณฑ์ไม่สำเร็จ:", err);
+      setCounts(
+        Object.fromEntries(ASSET_TYPES.map((t) => [t, 0])) as Record<
+          AssetType,
+          number
+        >,
+      );
     }
   }, []);
 
   useEffect(() => {
-    window.addEventListener(DATA_CHANGED_EVENT, reloadCounts);
-    return () => window.removeEventListener(DATA_CHANGED_EVENT, reloadCounts);
-  }, [reloadCounts]);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    loadCounts();
+    window.addEventListener(DATA_CHANGED_EVENT, loadCounts);
+    return () => window.removeEventListener(DATA_CHANGED_EVENT, loadCounts);
+  }, [loadCounts]);
 
   const active = (path: string) => (pathname === path ? "active" : "");
 
@@ -52,13 +48,9 @@ export default function AppShell({
           <div className="top-spacer"></div>
           <div className="sync">
             <span className="dot" style={{ background: "var(--ok)" }}></span>
-            <span>{email}</span>
+            <span>เชื่อมต่อฐานข้อมูล Neon</span>
           </div>
-          <button
-            className="btn ghost"
-            onClick={() => signOutAction()}
-            title="ออกจากระบบ"
-          >
+          <button className="btn ghost" onClick={lock} title="ออกจากระบบ">
             <i className="ti ti-logout"></i> ออกจากระบบ
           </button>
         </div>
@@ -69,14 +61,9 @@ export default function AppShell({
           {ASSET_TYPES.map((t) => (
             <Link key={t} href={`/${t}`} className={active(`/${t}`)}>
               <i className={`ti ${SCHEMA[t].icon}`}></i> {SCHEMA[t].label}{" "}
-              <span className="cnt">{counts[t]}</span>
+              <span className="cnt">{counts ? counts[t] : "…"}</span>
             </Link>
           ))}
-          {admin && (
-            <Link href="/admin" className={active("/admin")}>
-              <i className="ti ti-user-shield"></i> ผู้ดูแลระบบ
-            </Link>
-          )}
         </nav>
       </header>
       <div className="wrap">{children}</div>

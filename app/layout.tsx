@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { IBM_Plex_Sans_Thai, IBM_Plex_Mono } from "next/font/google";
 import "@tabler/icons-webfont/dist/tabler-icons.min.css";
 import "./globals.css";
+import AppShell from "@/components/AppShell";
+import PasscodeGate from "@/components/PasscodeGate";
 
 const sans = IBM_Plex_Sans_Thai({
   variable: "--font-sans",
@@ -27,7 +29,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="th" className={`${sans.variable} ${mono.variable}`}>
-      <body>{children}</body>
+      <body>
+        <PasscodeGate>
+          <AppShell>{children}</AppShell>
+        </PasscodeGate>
+      </body>
     </html>
   );
 }
