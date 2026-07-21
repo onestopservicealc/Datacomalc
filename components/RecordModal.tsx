@@ -11,6 +11,7 @@ import {
 } from "@/lib/schema";
 import type { AssetRecord, AssetType } from "@/lib/types";
 import { distinctValues } from "@/lib/data";
+import Icon from "./Icon";
 
 type Props = {
   type: AssetType;
@@ -128,7 +129,7 @@ export default function RecordModal({
         <div className="modal-h">
           <h2>{record ? "แก้ไข" : "เพิ่ม"}{sc.singular}</h2>
           <button className="iconbtn" onClick={onClose}>
-            <i className="ti ti-x"></i>
+            <Icon name="x" />
           </button>
         </div>
         <div className="modal-b">
@@ -142,7 +143,7 @@ export default function RecordModal({
         <div className="modal-f">
           {record && onDelete ? (
             <button className="btn ghost del" onClick={onDelete}>
-              <i className="ti ti-trash"></i> ลบรายการนี้
+              <Icon name="trash" /> ลบรายการนี้
             </button>
           ) : (
             <span></span>
@@ -152,7 +153,7 @@ export default function RecordModal({
               ยกเลิก
             </button>
             <button className="btn primary" onClick={save}>
-              <i className="ti ti-check"></i> บันทึก
+              <Icon name="check" /> บันทึก
             </button>
           </div>
         </div>

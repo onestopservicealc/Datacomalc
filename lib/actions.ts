@@ -1,63 +1,35 @@
 "use server";
 
+import { updateTag } from "next/cache";
 import { sql } from "./db";
-import { ASSET_TYPES, isAssetType } from "./types";
+import { isAssetType } from "./types";
 import type { AssetRecord, AssetType } from "./types";
+import {
+  ASSETS_TAG,
+  getCounts as getCountsCached,
+  listAssets as listAssetsCached,
+} from "./queries";
 
 /**
  * Server actions — ขอบเขต server/client ของระบบ
- * client (NeonStore ใน lib/data.ts) เรียกฟังก์ชันเหล่านี้; ตัว query จริงรันบน server
- * ทุกฟังก์ชัน validate type กัน input แปลกจาก client
+ * - อ่าน (refetch*) : client เรียกหลัง mutation → อ่านจาก Data Cache (lib/queries.ts)
+ * - เขียน (insert/update/remove) : เขียน Neon แล้ว updateTag(ASSETS_TAG) ล้าง cache (read-your-own-writes)
+ * Server Components อ่านตรงจาก lib/queries.ts (ไม่ผ่าน action)
  */
 
 function assertType(type: string): asserts type is AssetType {
   if (!isAssetType(type)) throw new Error(`ประเภทครุภัณฑ์ไม่ถูกต้อง: ${type}`);
 }
 
-/** map แถวจากฐานข้อมูลเป็น AssetRecord (id → _id, กระจาย data) */
-function toRecord(row: { id: string; data: Record<string, string> }): AssetRecord {
-  return { ...row.data, _id: row.id };
-}
-
-export async function listAssets(type: string): Promise<AssetRecord[]> {
+/** client (AssetTable.reload) เรียกหลังเพิ่ม/แก้/ลบ — cache เพิ่ง revalidate จึงได้ข้อมูลใหม่ */
+export async function refetchAssets(type: string): Promise<AssetRecord[]> {
   assertType(type);
-  const rows = (await sql`
-    select id::text as id, data
-    from assets
-    where type = ${type}
-    order by created_at asc
-  `) as { id: string; data: Record<string, string> }[];
-  return rows.map(toRecord);
+  return listAssetsCached(type);
 }
 
-/** จำนวนครุภัณฑ์ต่อ type — query เดียว (count) แทนดึงเต็มแถว 4 ครั้ง */
-export async function getCounts(): Promise<Record<AssetType, number>> {
-  const rows = (await sql`
-    select type, count(*)::int as n from assets group by type
-  `) as { type: string; n: number }[];
-  const counts = Object.fromEntries(
-    ASSET_TYPES.map((t) => [t, 0]),
-  ) as Record<AssetType, number>;
-  for (const r of rows) {
-    if (isAssetType(r.type)) counts[r.type] = r.n;
-  }
-  return counts;
-}
-
-/** ดึงครุภัณฑ์ทุก type ใน query เดียว (สำหรับหน้า dashboard) */
-export async function listAll(): Promise<Record<AssetType, AssetRecord[]>> {
-  const rows = (await sql`
-    select id::text as id, type, data
-    from assets
-    order by created_at asc
-  `) as { id: string; type: string; data: Record<string, string> }[];
-  const out = Object.fromEntries(
-    ASSET_TYPES.map((t) => [t, [] as AssetRecord[]]),
-  ) as Record<AssetType, AssetRecord[]>;
-  for (const r of rows) {
-    if (isAssetType(r.type)) out[r.type].push(toRecord(r));
-  }
-  return out;
+/** client (AppShell) เรียกหลังข้อมูลเปลี่ยน เพื่ออัปเดตตัวเลขบนแท็บ */
+export async function refetchCounts(): Promise<Record<AssetType, number>> {
+  return getCountsCached();
 }
 
 export async function insertAsset(
@@ -70,7 +42,9 @@ export async function insertAsset(
     values (${type}, ${JSON.stringify(data)}::jsonb)
     returning id::text as id, data
   `) as { id: string; data: Record<string, string> }[];
-  return toRecord(rows[0]);
+  updateTag(ASSETS_TAG);
+  const row = rows[0];
+  return { ...row.data, _id: row.id };
 }
 
 export async function updateAsset(
@@ -84,6 +58,7 @@ export async function updateAsset(
     set data = ${JSON.stringify(data)}::jsonb
     where id = ${id} and type = ${type}
   `;
+  updateTag(ASSETS_TAG);
 }
 
 export async function removeAsset(type: string, id: string): Promise<void> {
@@ -92,4 +67,5 @@ export async function removeAsset(type: string, id: string): Promise<void> {
     delete from assets
     where id = ${id} and type = ${type}
   `;
+  updateTag(ASSETS_TAG);
 }

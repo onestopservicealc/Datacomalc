@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import AssetTable from "@/components/AssetTable";
 import { isAssetType } from "@/lib/types";
-import { listAssets } from "@/lib/actions";
+import { listAssets } from "@/lib/queries";
 
 export const dynamic = "force-dynamic";
 

@@ -1,7 +1,7 @@
 import type { AssetRecord, AssetType } from "./types";
 import {
   insertAsset,
-  listAssets,
+  refetchAssets,
   removeAsset,
   updateAsset,
 } from "./actions";
@@ -24,7 +24,7 @@ class NeonStore implements DataStore {
   readonly kind = "neon" as const;
 
   list(type: AssetType) {
-    return listAssets(type);
+    return refetchAssets(type);
   }
 
   insert(type: AssetType, data: Record<string, string>) {

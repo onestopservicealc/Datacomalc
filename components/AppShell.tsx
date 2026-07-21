@@ -6,37 +6,34 @@ import { usePathname } from "next/navigation";
 import { SCHEMA } from "@/lib/schema";
 import { ASSET_TYPES, type AssetType } from "@/lib/types";
 import { DATA_CHANGED_EVENT } from "@/lib/data";
-import { getCounts } from "@/lib/actions";
-import { signOutAction } from "@/lib/auth/actions";
+import { refetchCounts } from "@/lib/actions";
+import { lock } from "@/lib/gate";
+import Icon from "./Icon";
 
 export default function AppShell({
   children,
-  email,
-  admin,
   initialCounts,
 }: {
   children: React.ReactNode;
-  email: string;
-  admin: boolean;
+  /** จำนวนต่อ type ที่ layout ดึงมาให้ฝั่ง server แล้ว — ไม่มี fetch waterfall ตอน mount */
   initialCounts: Record<AssetType, number>;
 }) {
   const pathname = usePathname();
-  // seed counts จาก server — ไม่ fetch ตอน mount
   const [counts, setCounts] = useState<Record<AssetType, number>>(initialCounts);
 
-  // reload counts เฉพาะหลัง mutation (event) — ไม่ยิงตอน mount
-  const reloadCounts = useCallback(async () => {
+  // refetch เฉพาะหลังข้อมูลเปลี่ยน (insert/update/delete) — ไม่ยิงตอน mount
+  const loadCounts = useCallback(async () => {
     try {
-      setCounts(await getCounts());
+      setCounts(await refetchCounts());
     } catch (err) {
       console.error("โหลดจำนวนครุภัณฑ์ไม่สำเร็จ:", err);
     }
   }, []);
 
   useEffect(() => {
-    window.addEventListener(DATA_CHANGED_EVENT, reloadCounts);
-    return () => window.removeEventListener(DATA_CHANGED_EVENT, reloadCounts);
-  }, [reloadCounts]);
+    window.addEventListener(DATA_CHANGED_EVENT, loadCounts);
+    return () => window.removeEventListener(DATA_CHANGED_EVENT, loadCounts);
+  }, [loadCounts]);
 
   const active = (path: string) => (pathname === path ? "active" : "");
 
@@ -52,31 +49,22 @@ export default function AppShell({
           <div className="top-spacer"></div>
           <div className="sync">
             <span className="dot" style={{ background: "var(--ok)" }}></span>
-            <span>{email}</span>
+            <span>เชื่อมต่อฐานข้อมูล Neon</span>
           </div>
-          <button
-            className="btn ghost"
-            onClick={() => signOutAction()}
-            title="ออกจากระบบ"
-          >
-            <i className="ti ti-logout"></i> ออกจากระบบ
+          <button className="btn ghost" onClick={lock} title="ออกจากระบบ">
+            <Icon name="logout" /> ออกจากระบบ
           </button>
         </div>
         <nav className="tabs">
           <Link href="/" className={active("/")}>
-            <i className="ti ti-layout-dashboard"></i> ภาพรวม
+            <Icon name="layout-dashboard" /> ภาพรวม
           </Link>
           {ASSET_TYPES.map((t) => (
             <Link key={t} href={`/${t}`} className={active(`/${t}`)}>
-              <i className={`ti ${SCHEMA[t].icon}`}></i> {SCHEMA[t].label}{" "}
+              <Icon name={SCHEMA[t].icon} /> {SCHEMA[t].label}{" "}
               <span className="cnt">{counts[t]}</span>
             </Link>
           ))}
-          {admin && (
-            <Link href="/admin" className={active("/admin")}>
-              <i className="ti ti-user-shield"></i> ผู้ดูแลระบบ
-            </Link>
-          )}
         </nav>
       </header>
       <div className="wrap">{children}</div>

@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import { IBM_Plex_Sans_Thai, IBM_Plex_Mono } from "next/font/google";
-import "@tabler/icons-webfont/dist/tabler-icons.min.css";
 import "./globals.css";
+import AppShell from "@/components/AppShell";
+import PasscodeGate from "@/components/PasscodeGate";
+import { getCounts } from "@/lib/queries";
+import { ASSET_TYPES, type AssetType } from "@/lib/types";
 
 const sans = IBM_Plex_Sans_Thai({
   variable: "--font-sans",
@@ -20,14 +23,29 @@ export const metadata: Metadata = {
   description: "ระบบจัดเก็บและค้นหาข้อมูลครุภัณฑ์ไอที",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // ดึงจำนวนต่อ type ฝั่ง server (cache) — ส่งให้ AppShell ตัด client fetch waterfall ตอนโหลด
+  let counts: Record<AssetType, number>;
+  try {
+    counts = await getCounts();
+  } catch {
+    counts = Object.fromEntries(ASSET_TYPES.map((t) => [t, 0])) as Record<
+      AssetType,
+      number
+    >;
+  }
+
   return (
     <html lang="th" className={`${sans.variable} ${mono.variable}`}>
-      <body>{children}</body>
+      <body>
+        <PasscodeGate>
+          <AppShell initialCounts={counts}>{children}</AppShell>
+        </PasscodeGate>
+      </body>
     </html>
   );
 }

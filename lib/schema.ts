@@ -1,4 +1,5 @@
 import type { AssetType } from "./types";
+import type { IconName } from "@/components/Icon";
 
 /** ชนิด input ของฟิลด์ในฟอร์ม: text | datalist:<source> | select:<opt1,opt2,...> */
 export type FieldDef = {
@@ -10,7 +11,7 @@ export type FieldDef = {
 export type SectionDef = { title: string; fields: FieldDef[] };
 export type TypeSchema = {
   label: string;
-  icon: string;
+  icon: IconName;
   singular: string;
   tableCols: [key: string, label: string][];
   groupField: string;
@@ -41,7 +42,7 @@ export const MONO_KEYS = new Set([
 export const SCHEMA: Record<AssetType, TypeSchema> = {
   pc: {
     label: "คอมพิวเตอร์",
-    icon: "ti-device-desktop",
+    icon: "device-desktop",
     singular: "เครื่องคอมพิวเตอร์",
     tableCols: [
       ["name", "ชื่อ-นามสกุล"],
@@ -113,7 +114,7 @@ export const SCHEMA: Record<AssetType, TypeSchema> = {
   },
   notebook: {
     label: "โน้ตบุ๊ก",
-    icon: "ti-device-laptop",
+    icon: "device-laptop",
     singular: "โน้ตบุ๊ก",
     tableCols: [
       ["asset", "เลขครุภัณฑ์"],
@@ -165,7 +166,7 @@ export const SCHEMA: Record<AssetType, TypeSchema> = {
   },
   ups: {
     label: "UPS",
-    icon: "ti-battery-charging",
+    icon: "battery-charging",
     singular: "เครื่องสำรองไฟ",
     tableCols: [
       ["name", "ชื่อ-นามสกุล"],
@@ -201,7 +202,7 @@ export const SCHEMA: Record<AssetType, TypeSchema> = {
   },
   printer: {
     label: "Printer / Scanner",
-    icon: "ti-printer",
+    icon: "printer",
     singular: "เครื่องพิมพ์/สแกน",
     tableCols: [
       ["owner", "ผู้รับผิดชอบ"],

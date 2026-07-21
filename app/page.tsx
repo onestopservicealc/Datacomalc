@@ -1,41 +1,28 @@
 import { GROUPS, NETWORK_INFO, SCHEMA } from "@/lib/schema";
-import { ASSET_TYPES, type AssetType } from "@/lib/types";
-import { listAll } from "@/lib/actions";
+import { ASSET_TYPES } from "@/lib/types";
+import { getCounts, getDashboardStats } from "@/lib/queries";
+import Icon from "@/components/Icon";
 
 export const dynamic = "force-dynamic";
 
-/** ภาพรวม — Server Component: ดึง + คำนวณสถิติฝั่ง server (ไม่มี client fetch/spinner) */
+/** ภาพรวม — Server Component: สถิติคำนวณใน SQL (cache) ไม่ดึงทุกแถวมานับใน JS */
 export default async function DashboardPage() {
-  const data = await listAll();
+  const [counts, stats] = await Promise.all([getCounts(), getDashboardStats()]);
 
-  const total = ASSET_TYPES.reduce((a, t) => a + data[t].length, 0);
-  const win10 = (t: AssetType) =>
-    data[t].filter((r) => (r.os || "").trim().startsWith("10")).length;
-  const w10 = win10("pc") + win10("notebook");
+  const total = ASSET_TYPES.reduce((a, t) => a + counts[t], 0);
+  const w10 = stats.win10;
 
-  const groupCount: Record<string, number> = {};
-  for (const g of GROUPS) groupCount[g] = 0;
-  for (const r of data.pc) {
-    const g = (r.group || "").trim();
-    if (g in groupCount) groupCount[g]++;
-  }
-  const gmax = Math.max(1, ...Object.values(groupCount));
+  const groupCount = stats.groupCount;
+  const gmax = Math.max(1, ...GROUPS.map((g) => groupCount[g] ?? 0));
 
-  const brandCount: Record<string, number> = {};
-  for (const r of data.pc) {
-    const b = (r.brand || "").trim() || "ไม่ระบุ";
-    brandCount[b] = (brandCount[b] || 0) + 1;
-  }
-  const brands = Object.entries(brandCount)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 6);
+  const brands = stats.brands;
   const bmax = Math.max(1, ...brands.map(([, n]) => n));
 
   return (
     <div className="panel">
       {w10 > 0 && (
         <div className="alert">
-          <i className="ti ti-alert-triangle"></i>
+          <Icon name="alert-triangle" />
           <div>
             <b>มีเครื่องที่ยังใช้ Windows 10 อยู่ {w10} เครื่อง</b>
             <p>
@@ -50,16 +37,16 @@ export default async function DashboardPage() {
       <div className="stats">
         <div className="stat">
           <div className="k">
-            <i className="ti ti-stack-2"></i> ครุภัณฑ์ทั้งหมด
+            <Icon name="stack-2" /> ครุภัณฑ์ทั้งหมด
           </div>
           <div className="v">{total}</div>
         </div>
         {ASSET_TYPES.map((t) => (
           <div className="stat" key={t}>
             <div className="k">
-              <i className={`ti ${SCHEMA[t].icon}`}></i> {SCHEMA[t].label}
+              <Icon name={SCHEMA[t].icon} /> {SCHEMA[t].label}
             </div>
-            <div className="v">{data[t].length}</div>
+            <div className="v">{counts[t]}</div>
           </div>
         ))}
       </div>
@@ -67,7 +54,7 @@ export default async function DashboardPage() {
       <div className="grid2">
         <div className="block">
           <h3>
-            <i className="ti ti-users-group"></i> คอมพิวเตอร์แยกตามกลุ่มงาน
+            <Icon name="users-group" /> คอมพิวเตอร์แยกตามกลุ่มงาน
           </h3>
           {GROUPS.map((g) => (
             <div className="bar-row" key={g}>
@@ -78,17 +65,17 @@ export default async function DashboardPage() {
                 <div
                   className="bar-fill"
                   style={{
-                    width: `${Math.round((groupCount[g] / gmax) * 100)}%`,
+                    width: `${Math.round(((groupCount[g] ?? 0) / gmax) * 100)}%`,
                   }}
                 ></div>
               </div>
-              <span className="num">{groupCount[g]}</span>
+              <span className="num">{groupCount[g] ?? 0}</span>
             </div>
           ))}
         </div>
         <div className="block">
           <h3>
-            <i className="ti ti-tag"></i> ยี่ห้อคอมพิวเตอร์
+            <Icon name="tag" /> ยี่ห้อคอมพิวเตอร์
           </h3>
           {brands.map(([b, n]) => (
             <div className="bar-row" key={b}>
@@ -112,7 +99,7 @@ export default async function DashboardPage() {
 
       <div className="block" style={{ marginTop: 12 }}>
         <h3>
-          <i className="ti ti-network"></i> ค่าเครือข่าย (IP / Gateway / DNS)
+          <Icon name="network" /> ค่าเครือข่าย (IP / Gateway / DNS)
         </h3>
         {NETWORK_INFO.map((line) => (
           <div

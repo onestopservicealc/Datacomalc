@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useDeferredValue, useMemo, useState } from "react";
 import { MONO_KEYS, SCHEMA } from "@/lib/schema";
 import type { AssetRecord, AssetType } from "@/lib/types";
 import { distinctValues, getStore, notifyDataChanged } from "@/lib/data";
@@ -8,6 +8,7 @@ import { exportCSV } from "@/lib/csv";
 import { GroupCell, OsBadge, PlainCell } from "./badges";
 import RecordModal from "./RecordModal";
 import { Toast, useToast } from "./Toast";
+import Icon from "./Icon";
 
 export default function AssetTable({
   type,
@@ -20,6 +21,8 @@ export default function AssetTable({
   // seed จากข้อมูลที่ server ส่งมา — ไม่ fetch ตอน mount (ไม่มี spinner)
   const [records, setRecords] = useState<AssetRecord[]>(initial);
   const [search, setSearch] = useState("");
+  // ให้ช่องค้นหาตอบสนองทันที แต่หน่วงการกรองตาราง (ไม่กระตุกเมื่อข้อมูลเยอะ)
+  const deferredSearch = useDeferredValue(search);
   const [filter, setFilter] = useState("");
   // modal: undefined = ปิด, null = เพิ่มใหม่, record = แก้ไข
   const [editing, setEditing] = useState<AssetRecord | null | undefined>(
@@ -45,8 +48,8 @@ export default function AssetTable({
   const rows = useMemo(() => {
     let r = records;
     if (filter) r = r.filter((x) => (x[sc.groupField] || "") === filter);
-    if (search) {
-      const q = search.toLowerCase();
+    if (deferredSearch) {
+      const q = deferredSearch.toLowerCase();
       r = r.filter((x) =>
         Object.values(x).some((v) =>
           String(v || "").toLowerCase().includes(q),
@@ -54,7 +57,7 @@ export default function AssetTable({
       );
     }
     return r;
-  }, [records, filter, search, sc.groupField]);
+  }, [records, filter, deferredSearch, sc.groupField]);
 
   async function saveRecord(data: Record<string, string>) {
     const store = getStore();
@@ -86,7 +89,7 @@ export default function AssetTable({
     <div className="panel">
       <div className="toolbar">
         <div className="search">
-          <i className="ti ti-search ic"></i>
+          <Icon name="search" className="ic" />
           <input
             placeholder={`ค้นหา ${sc.singular}… (ชื่อ, เลขครุภัณฑ์, IP, รุ่น ฯลฯ)`}
             value={search}
@@ -106,10 +109,10 @@ export default function AssetTable({
           ))}
         </select>
         <button className="btn" onClick={() => exportCSV(type, records)}>
-          <i className="ti ti-download"></i> Export CSV
+          <Icon name="download" /> Export CSV
         </button>
         <button className="btn primary" onClick={() => setEditing(null)}>
-          <i className="ti ti-plus"></i> เพิ่ม{sc.singular}
+          <Icon name="plus" /> เพิ่ม{sc.singular}
         </button>
       </div>
 
@@ -131,7 +134,7 @@ export default function AssetTable({
                 <tr>
                   <td colSpan={sc.tableCols.length + 1}>
                     <div className="empty">
-                      <i className="ti ti-inbox"></i>
+                      <Icon name="inbox" />
                       {search || filter
                         ? "ไม่พบรายการที่ตรงกับเงื่อนไข"
                         : "ยังไม่มีรายการ กด “เพิ่ม” เพื่อเริ่มบันทึก"}
@@ -167,7 +170,7 @@ export default function AssetTable({
                             setEditing(r);
                           }}
                         >
-                          <i className="ti ti-edit" aria-hidden="true"></i>
+                          <Icon name="edit" />
                         </button>
                         <button
                           type="button"
@@ -179,7 +182,7 @@ export default function AssetTable({
                             deleteRecord(r._id);
                           }}
                         >
-                          <i className="ti ti-trash" aria-hidden="true"></i>
+                          <Icon name="trash" />
                         </button>
                       </div>
                     </td>

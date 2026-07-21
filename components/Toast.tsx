@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
+import Icon from "./Icon";
 
 export type ToastState = { msg: string; danger?: boolean } | null;
 
@@ -22,8 +23,7 @@ export function Toast({ toast }: { toast: ToastState }) {
     <div className={`toast${toast ? " show" : ""}`}>
       {toast && (
         <>
-          <i className={`ti ti-${toast.danger ? "alert-circle" : "check"}`}></i>{" "}
-          {toast.msg}
+          <Icon name={toast.danger ? "alert-circle" : "check"} /> {toast.msg}
         </>
       )}
     </div>

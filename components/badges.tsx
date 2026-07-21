@@ -1,3 +1,5 @@
+import Icon from "./Icon";
+
 /** ป้ายสถานะ Windows: 11 = เขียว, 10 = เหลืองเตือน (หมดระยะสนับสนุน) */
 export function OsBadge({ value }: { value?: string }) {
   const s = (value || "").trim();
@@ -5,13 +7,13 @@ export function OsBadge({ value }: { value?: string }) {
   if (s.startsWith("11"))
     return (
       <span className="badge win11">
-        <i className="ti ti-check"></i>Win {s}
+        <Icon name="check" />Win {s}
       </span>
     );
   if (s.startsWith("10"))
     return (
       <span className="badge win10">
-        <i className="ti ti-alert-triangle"></i>Win {s}
+        <Icon name="alert-triangle" />Win {s}
       </span>
     );
   return <span className="badge na">{s}</span>;
