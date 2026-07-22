@@ -44,8 +44,7 @@ export default function AppShell({
   const active = (path: string) => (pathname === path ? "active" : "");
 
   return (
-    <div className="page">
-      <div className="shell">
+    <div className="shell">
       <header className="top">
         <div className="top-inner">
           <div className="logo">สค</div>
@@ -75,7 +74,6 @@ export default function AppShell({
         </nav>
       </header>
       <div className="wrap">{children}</div>
-      </div>
     </div>
   );
 }
