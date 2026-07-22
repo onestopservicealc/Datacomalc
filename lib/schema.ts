@@ -207,6 +207,7 @@ export const SCHEMA: Record<AssetType, TypeSchema> = {
     tableCols: [
       ["owner", "ผู้รับผิดชอบ"],
       ["building", "อาคาร"],
+      ["asset", "เลขครุภัณฑ์"],
       ["brand", "ยี่ห้อ"],
       ["model", "รุ่น"],
       ["type", "ประเภท"],
