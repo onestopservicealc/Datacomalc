@@ -12,7 +12,7 @@
   html{margin:0;padding:0;font-size:112.5%}
   body{margin:0;padding:0;font-family:var(--font-sans),'IBM Plex Sans Thai',system-ui,sans-serif;background:#E9EAEE;color:var(--ink);font-size:var(--fs-base);line-height:1.65;-webkit-font-smoothing:antialiased}
   /* กรอบการ์ดครอบทั้งแอป (ตาม mockup 1b) */
-  .page{padding:28px 20px 60px}
+  .page{padding:0 0 0}
   .shell{max-width:100%;margin:0 auto;background:var(--bg);border:1px solid var(--line-2);border-radius:16px;overflow:hidden;box-shadow:0 24px 60px -30px rgba(24,26,31,.35)}
   .wrap{padding:22px 26px 30px}
   /* ไอคอน SVG inline (components/Icon.tsx) — จัดให้อยู่แนวเดียวกับข้อความเหมือน webfont เดิม */
