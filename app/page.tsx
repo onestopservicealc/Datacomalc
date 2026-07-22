@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { GROUPS, NETWORK_INFO, SCHEMA } from "@/lib/schema";
 import { ASSET_TYPES } from "@/lib/types";
 import { getCounts, getDashboardStats } from "@/lib/queries";
@@ -19,36 +20,42 @@ export default async function DashboardPage() {
   const bmax = Math.max(1, ...brands.map(([, n]) => n));
 
   return (
-    <div className="panel">
-      {w10 > 0 && (
-        <div className="alert">
-          <Icon name="alert-triangle" />
-          <div>
-            <b>มีเครื่องที่ยังใช้ Windows 10 อยู่ {w10} เครื่อง</b>
-            <p>
-              Windows 10 สิ้นสุดการสนับสนุนด้านความปลอดภัยแล้ว
-              ควรวางแผนอัปเกรดเป็น Windows 11 เพื่อลดความเสี่ยง —
-              กรองดูได้ในแท็บคอมพิวเตอร์และโน้ตบุ๊ก
-            </p>
-          </div>
+    <div className="dash">
+      <div className="dash-top">
+        <div className="hero">
+          <div className="hero-k">ครุภัณฑ์ไอทีทั้งหมด</div>
+          <div className="hero-v">{total}</div>
+          <div className="hero-sub">คอมพิวเตอร์ · โน้ตบุ๊ก · UPS · Printer</div>
         </div>
-      )}
-
-      <div className="stats">
-        <div className="stat">
-          <div className="k">
-            <Icon name="stack-2" /> ครุภัณฑ์ทั้งหมด
-          </div>
-          <div className="v">{total}</div>
-        </div>
-        {ASSET_TYPES.map((t) => (
-          <div className="stat" key={t}>
-            <div className="k">
-              <Icon name={SCHEMA[t].icon} /> {SCHEMA[t].label}
+        <div className="dash-right">
+          {w10 > 0 && (
+            <div className="alert">
+              <span className="alert-ic">
+                <Icon name="alert-triangle" />
+              </span>
+              <div className="alert-body">
+                <b>Windows 10 ค้างอยู่ {w10} เครื่อง</b>
+                <p>
+                  หมดระยะสนับสนุนด้านความปลอดภัยแล้ว —
+                  ควรวางแผนอัปเกรดเป็น Windows 11
+                </p>
+              </div>
+              <Link className="alert-act" href="/pc">
+                ดูรายการ
+              </Link>
             </div>
-            <div className="v">{counts[t]}</div>
+          )}
+          <div className="mini-stats">
+            {ASSET_TYPES.map((t) => (
+              <div className="mini" key={t}>
+                <div className="k">
+                  <Icon name={SCHEMA[t].icon} /> {SCHEMA[t].label}
+                </div>
+                <div className="v">{counts[t]}</div>
+              </div>
+            ))}
           </div>
-        ))}
+        </div>
       </div>
 
       <div className="grid2">
@@ -66,6 +73,7 @@ export default async function DashboardPage() {
                   className="bar-fill"
                   style={{
                     width: `${Math.round(((groupCount[g] ?? 0) / gmax) * 100)}%`,
+                    background: "var(--ink)",
                   }}
                 ></div>
               </div>
@@ -85,35 +93,21 @@ export default async function DashboardPage() {
               <div className="bar-track">
                 <div
                   className="bar-fill"
-                  style={{
-                    width: `${Math.round((n / bmax) * 100)}%`,
-                    background: "#0E7C57",
-                  }}
+                  style={{ width: `${Math.round((n / bmax) * 100)}%` }}
                 ></div>
               </div>
               <span className="num">{n}</span>
             </div>
           ))}
-        </div>
-      </div>
-
-      <div className="block" style={{ marginTop: 12 }}>
-        <h3>
-          <Icon name="network" /> ค่าเครือข่าย (IP / Gateway / DNS)
-        </h3>
-        {NETWORK_INFO.map((line) => (
-          <div
-            key={line}
-            style={{
-              fontFamily: "var(--mono)",
-              fontSize: "var(--fs-xs)",
-              color: "var(--ink-2)",
-              padding: "4px 0",
-            }}
-          >
-            {line}
+          <div className="net">
+            <div className="net-t">ค่าเครือข่ายหน่วยงาน</div>
+            {NETWORK_INFO.map((line) => (
+              <div className="net-line" key={line}>
+                {line}
+              </div>
+            ))}
           </div>
-        ))}
+        </div>
       </div>
     </div>
   );

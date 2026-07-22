@@ -1,8 +1,8 @@
 :root{
-    --bg:#F5F6F8; --surface:#FFFFFF; --ink:#182130; --ink-2:#5B6472; --ink-3:#667085;
-    --line:#E4E7EC; --line-2:#D3D8E0; --accent:#2F5FE0; --accent-soft:#EAF0FF;
-    --danger:#D8453A; --danger-soft:#FDECEA; --warn:#B5730B; --warn-soft:#FBF0DC;
-    --ok:#0E7C57; --ok-soft:#E6F4EE; --radius:10px;
+    --bg:#F6F6F7; --surface:#FFFFFF; --ink:#181A1F; --ink-2:#565C68; --ink-3:#8A909C;
+    --line:#EAEBED; --line-2:#DADCE0; --accent:#DA1E28; --accent-soft:#FCEDEC; --accent-ink:#A9141C;
+    --danger:#DA1E28; --danger-soft:#FCEDEC; --warn:#A9141C; --warn-soft:#FCEDEC;
+    --ok:#3FBF7F; --ok-soft:#E6F4EE; --radius:12px;
     --mono:var(--font-mono),'IBM Plex Mono',ui-monospace,monospace;
     /* type scale — 1rem = 18px (html font-size:112.5%) */
     --fs-badge:.72rem; --fs-xs:.78rem; --fs-sm:.83rem; --fs-ctl:.89rem;
@@ -21,7 +21,7 @@
 
   header.top{background:var(--surface);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:30}
   .top-inner{max-width:1180px;margin:0 auto;padding:14px 20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
-  .logo{width:44px;height:44px;border-radius:9px;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:var(--fs-h);flex-shrink:0}
+  .logo{width:44px;height:44px;border-radius:11px;background:var(--ink);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:var(--fs-h);flex-shrink:0}
   .title h1{margin:0;font-size:var(--fs-h);font-weight:600;letter-spacing:-.01em}
   .title p{margin:1px 0 0;font-size:var(--fs-xs);color:var(--ink-2)}
   .top-spacer{flex:1}
@@ -47,7 +47,7 @@
   .btn:hover{background:var(--bg);border-color:var(--ink-3)}
   .btn:focus-visible{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
   .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
-  .btn.primary:hover{background:#254dbd}
+  .btn.primary:hover{background:var(--accent-ink)}
   .btn.ghost{border-color:transparent;color:var(--ink-2)}
   .btn.ghost:hover{background:var(--bg)}
 
@@ -61,7 +61,7 @@
   tbody td{padding:14px 16px;border-bottom:1px solid var(--line);vertical-align:middle}
   tbody tr:last-child td{border-bottom:0}
   tbody tr{cursor:pointer}
-  tbody tr:hover{background:var(--accent-soft)}
+  tbody tr:hover{background:#FAFAFB}
   td.mono,th.mono{font-family:var(--mono);font-size:var(--fs-xs);color:var(--ink)}
   .rowact{display:flex;gap:6px;justify-content:flex-end}
   .iconbtn{width:44px;height:44px;padding:0;font:inherit;border:1px solid var(--line);background:var(--surface);border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink-2)}
@@ -72,18 +72,26 @@
   .empty i,.empty svg{font-size:32px;display:block;margin:0 auto 8px;opacity:.6}
   .muted{color:var(--ink-3)}
   .badge{display:inline-flex;align-items:center;gap:5px;font-size:var(--fs-badge);font-weight:500;padding:3px 10px;border-radius:99px;white-space:nowrap}
-  .badge.win10{background:var(--warn-soft);color:var(--warn)}
-  .badge.win11{background:var(--ok-soft);color:var(--ok)}
+  .badge.win10{background:var(--accent-soft);color:var(--accent-ink)}
+  .badge.win11{background:#EEF0F2;color:var(--ink)}
   .badge.na{background:var(--bg);color:var(--ink-3)}
   .badge.store{background:var(--bg);color:var(--ink-2)}
   .count-note{font-size:var(--fs-xs);color:var(--ink-2);margin:12px 2px 0}
 
-  /* dashboard */
-  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:12px}
-  .stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px}
-  .stat .k{font-size:var(--fs-sm);color:var(--ink-2);display:flex;align-items:center;gap:7px}
-  .stat .v{font-size:var(--fs-stat);font-weight:600;margin-top:6px;letter-spacing:-.02em;line-height:1.2}
-  .stat .v small{font-size:var(--fs-sm);font-weight:400;color:var(--ink-3)}
+  /* dashboard (1b — evolved topbar) */
+  .dash{padding-top:22px}
+  .dash-top{display:grid;grid-template-columns:1.1fr 2fr;gap:16px;margin-bottom:16px}
+  @media(max-width:820px){.dash-top{grid-template-columns:1fr}}
+  .hero{background:var(--ink);color:#fff;border-radius:16px;padding:24px 26px;display:flex;flex-direction:column;justify-content:center}
+  .hero-k{font-size:var(--fs-sm);color:#B9BDC6}
+  .hero-v{font-size:3.4rem;font-weight:700;letter-spacing:-.03em;line-height:1;margin-top:2px}
+  .hero-sub{font-size:var(--fs-xs);color:#9AA1AD;margin-top:8px}
+  .dash-right{display:flex;flex-direction:column;gap:14px}
+  .mini-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+  @media(max-width:560px){.mini-stats{grid-template-columns:repeat(2,1fr)}}
+  .mini{background:var(--surface);border:1px solid var(--line);border-radius:13px;padding:14px 16px}
+  .mini .k{display:flex;align-items:center;gap:6px;font-size:var(--fs-xs);color:var(--ink-2)}
+  .mini .v{font-size:1.9rem;font-weight:700;letter-spacing:-.02em;margin-top:2px;line-height:1.15}
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
   @media(max-width:720px){.grid2{grid-template-columns:1fr}}
   .block{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:18px}
@@ -93,10 +101,18 @@
   .bar-track{flex:1;height:10px;background:var(--bg);border-radius:99px;overflow:hidden}
   .bar-fill{height:100%;border-radius:99px;background:var(--accent)}
   .bar-row .num{width:34px;text-align:right;font-family:var(--mono);font-size:var(--fs-xs);color:var(--ink-2)}
-  .alert{display:flex;gap:12px;background:var(--warn-soft);border:1px solid #F0DDB4;border-radius:var(--radius);padding:14px 16px;margin-bottom:12px}
-  .alert i,.alert svg{color:var(--warn);font-size:22px;flex-shrink:0;margin-top:1px}
-  .alert b{color:#7A4E06}
-  .alert p{margin:3px 0 0;font-size:var(--fs-sm);color:#7A4E06}
+  .alert{display:flex;gap:14px;align-items:center;background:var(--accent-soft);border:1px solid #F3C9C9;border-radius:14px;padding:16px 20px}
+  .alert .alert-ic{width:44px;height:44px;border-radius:11px;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .alert .alert-ic svg{color:#fff}
+  .alert .alert-body{flex:1;min-width:0}
+  .alert b{color:var(--accent-ink);font-size:var(--fs-table);font-weight:700}
+  .alert p{margin:2px 0 0;font-size:var(--fs-sm);color:#8A3138}
+  .alert .alert-act{font-size:var(--fs-sm);font-weight:600;color:#fff;background:var(--accent);padding:8px 14px;border-radius:8px;white-space:nowrap;text-decoration:none;display:inline-flex;align-items:center}
+  .alert .alert-act:hover{background:var(--accent-ink)}
+  /* ค่าเครือข่าย (แทรกในการ์ดยี่ห้อ) */
+  .net{margin-top:18px;padding-top:16px;border-top:1px solid var(--line)}
+  .net-t{font-family:var(--mono);font-size:var(--fs-badge);font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin-bottom:8px}
+  .net-line{font-family:var(--mono);font-size:var(--fs-xs);color:var(--ink-2);padding:2px 0;word-break:break-word}
 
   /* modal */
   .overlay{position:fixed;inset:0;background:rgba(24,33,48,.42);z-index:50;display:none;align-items:flex-start;justify-content:center;padding:32px 16px;overflow-y:auto}
@@ -126,7 +142,7 @@
   /* หน้าใส่รหัสผ่าน (passcode gate) */
   .gate{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
   .gate-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:34px 30px;width:100%;max-width:380px;box-shadow:0 12px 34px rgba(24,33,48,.10);text-align:center}
-  .gate-logo{width:56px;height:56px;border-radius:13px;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:24px;margin:0 auto 18px}
+  .gate-logo{width:56px;height:56px;border-radius:13px;background:var(--ink);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:24px;margin:0 auto 18px}
   .gate-card h1{font-size:var(--fs-h);font-weight:600;margin:0 0 5px}
   .gate-card p{font-size:var(--fs-sm);color:var(--ink-2);margin:0 0 22px}
   .gate-card input{width:100%;height:54px;border:1px solid var(--line-2);border-radius:10px;padding:0 14px;font-family:var(--mono);font-size:1.22rem;text-align:center;letter-spacing:.35em;color:var(--ink);background:var(--surface)}
